@@ -338,3 +338,9 @@ The system can be extended with:
 The project demonstrates how multiple ambulances can collaboratively report road conditions to help another ambulance choose a route with a lower expected delay.
 
 It provides a prototype for distributed emergency vehicle route optimization and can be extended with real-world traffic, GPS, and machine-learning systems.
+
+## Author
+
+**Metla Srinath**
+B.Tech Computer Science and Engineering (Internet of Things)
+
