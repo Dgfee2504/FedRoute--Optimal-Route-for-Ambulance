@@ -339,9 +339,12 @@ The project demonstrates how multiple ambulances can collaboratively report road
 
 It provides a prototype for distributed emergency vehicle route optimization and can be extended with real-world traffic, GPS, and machine-learning systems.
 
-## Author
-
+## Author  
 **Metla Srinath**
 
 B.Tech Computer Science and Engineering (Internet of Things)
+
+## License
+
+This project is developed for **academic and educational purposes**.
 
