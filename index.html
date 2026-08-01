@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FedRoute — Ambulance Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:     #070b12;
+    --card:   #0e1a2e;
+    --border: #1a2f50;
+    --accent: #00d4ff;
+    --a2:     #0077ff;
+    --green:  #00e676;
+    --yellow: #ffea00;
+    --red:    #ff3d3d;
+    --orange: #ff9100;
+    --text:   #cce4ff;
+    --muted:  #3d5a80;
+    --mono:   'Share Tech Mono', monospace;
+    --sans:   'Exo 2', sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+  body::before{
+    content:'';position:fixed;inset:0;
+    background-image:linear-gradient(rgba(0,212,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.025) 1px,transparent 1px);
+    background-size:44px 44px;pointer-events:none;z-index:0;
+  }
+
+  /* HEADER */
+  header{
+    position:relative;z-index:10;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 36px;
+    background:rgba(10,18,32,.95);border-bottom:1px solid var(--border);
+    backdrop-filter:blur(12px);
+  }
+  .logo{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:1rem;letter-spacing:.14em;color:var(--accent)}
+  .logo-box{width:34px;height:34px;background:linear-gradient(135deg,var(--a2),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px}
+  .live{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:blink 2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* RECOMMENDATION HERO */
+  .hero{
+    position:relative;z-index:10;
+    padding:32px 36px;
+    background:linear-gradient(135deg,rgba(0,119,255,.1),rgba(0,212,255,.06),rgba(0,119,255,.1));
+    border-bottom:1px solid rgba(0,212,255,.12);
+    display:flex;align-items:center;justify-content:space-between;gap:24px;
+    flex-wrap:wrap;
+  }
+  .hero-left{}
+  .hero-label{font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;color:var(--muted);margin-bottom:6px}
+  .hero-title{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:14px}
+  .rec-box{
+    display:inline-flex;align-items:center;gap:16px;
+    padding:16px 28px;border-radius:12px;
+    background:rgba(0,230,118,.07);
+    border:1.5px solid var(--green);
+    box-shadow:0 0 28px rgba(0,230,118,.15),inset 0 0 20px rgba(0,230,118,.04);
+  }
+  .rec-letter{font-family:var(--mono);font-size:3.2rem;font-weight:900;color:var(--green);line-height:1;text-shadow:0 0 30px rgba(0,230,118,.6)}
+  .rec-info{}
+  .rec-tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.15em;color:var(--muted)}
+  .rec-name{font-size:1.1rem;font-weight:700;color:var(--green);margin-top:2px}
+  .rec-delay{font-family:var(--mono);font-size:.75rem;color:rgba(0,230,118,.7);margin-top:4px}
+
+  .rec-box.waiting{
+    background:rgba(61,90,128,.1);border-color:var(--muted);box-shadow:none;
+  }
+  .rec-box.waiting .rec-letter{color:var(--muted);text-shadow:none}
+  .rec-box.waiting .rec-name{color:var(--muted)}
+  .rec-box.waiting .rec-delay{color:var(--muted)}
+
+  /* FedAvg summary */
+  .hero-right{display:flex;gap:14px;flex-wrap:wrap}
+  .avg-card{
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+    padding:14px 20px;text-align:center;min-width:110px;
+    transition:border-color .3s,box-shadow .3s;
+  }
+  .avg-card.best{border-color:var(--green);box-shadow:0 0 16px rgba(0,230,118,.15)}
+  .avg-route{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--muted);margin-bottom:4px}
+  .avg-val{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--text);transition:color .3s}
+  .avg-card.best .avg-val{color:var(--green)}
+  .avg-sub{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-top:3px}
+
+  /* HOW IT WORKS strip */
+  .how{
+    position:relative;z-index:10;
+    display:flex;align-items:center;justify-content:center;gap:0;
+    padding:14px 36px;
+    background:rgba(10,18,32,.7);border-bottom:1px solid var(--border);
+    font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;
+    flex-wrap:wrap;gap:0;
+  }
+  .how-step{display:flex;align-items:center;gap:8px;color:var(--muted);padding:4px 16px}
+  .how-step .ico{font-size:1.1rem}
+  .how-step span{color:var(--text)}
+  .how-arrow{color:var(--border);font-size:1.1rem}
+
+  /* REPORTER GRID */
+  .section-title{
+    position:relative;z-index:10;
+    font-family:var(--mono);font-size:.65rem;letter-spacing:.18em;color:var(--muted);
+    padding:20px 36px 8px;text-transform:uppercase;
+  }
+  main{
+    position:relative;z-index:10;
+    max-width:1320px;margin:0 auto;
+    padding:8px 24px 40px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+    gap:18px;
+  }
+
+  /* REPORTER CARD */
+  .rep-card{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    overflow:hidden;transition:transform .25s,box-shadow .25s;
+  }
+  .rep-card:hover{transform:translateY(-3px) scale(1.005);box-shadow:0 10px 36px rgba(0,0,0,.45),0 0 0 1px rgba(0,212,255,.1)}
+  .rep-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 18px;background:rgba(0,212,255,.04);border-bottom:1px solid var(--border);
+  }
+  .rep-name{font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;color:var(--accent);display:flex;align-items:center;gap:8px}
+  .rep-badge{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;padding:2px 10px;border-radius:20px;background:rgba(0,212,255,.1);border:1px solid var(--accent);color:var(--accent)}
+  .rep-body{padding:14px 18px}
+
+  /* ROUTE ROW inside reporter card */
+  .rrow{
+    display:grid;grid-template-columns:22px 1fr 78px 64px;
+    align-items:center;gap:8px;
+    padding:9px 10px;border-radius:7px;margin-bottom:7px;
+    border:1px solid transparent;background:rgba(255,255,255,.018);
+    transition:all .3s;
+  }
+  .rrow.best{
+    background:rgba(0,230,118,.06);border-color:rgba(0,230,118,.4);
+    box-shadow:0 0 12px rgba(0,230,118,.1);
+  }
+  .rletter{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--muted);text-align:center}
+  .rrow.best .rletter{color:var(--green)}
+  .rname{font-size:.72rem;font-weight:600;color:var(--text)}
+  .rdist{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-top:2px}
+  .tpill{
+    font-family:var(--mono);font-size:.62rem;padding:3px 8px;border-radius:16px;
+    text-align:center;font-weight:700;letter-spacing:.04em;transition:all .3s;
+  }
+  .tl{background:rgba(0,230,118,.14);color:var(--green);border:1px solid rgba(0,230,118,.28)}
+  .tm{background:rgba(255,234,0,.11);color:var(--yellow);border:1px solid rgba(255,234,0,.28)}
+  .th{background:rgba(255,61,61,.13);color:var(--red);border:1px solid rgba(255,61,61,.28)}
+  .rdelay{font-family:var(--mono);font-size:.88rem;font-weight:700;color:var(--text);text-align:right;transition:color .3s}
+  .rrow.best .rdelay{color:var(--green)}
+  .rbreak{font-family:var(--mono);font-size:.54rem;color:var(--muted);text-align:right}
+
+  .rep-footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:9px 18px 14px;font-family:var(--mono);font-size:.62rem;color:var(--muted);
+  }
+  .wchip{background:rgba(0,119,255,.1);border:1px solid rgba(0,119,255,.28);border-radius:16px;padding:2px 10px;color:var(--a2)}
+
+  /* EMPTY */
+  .empty{grid-column:1/-1;text-align:center;padding:60px 20px;font-family:var(--mono);color:var(--muted);font-size:.8rem;letter-spacing:.08em}
+  .empty-ico{font-size:2.8rem;margin-bottom:12px;opacity:.3}
+
+  /* REFRESH */
+  .rbar{position:fixed;bottom:0;left:0;right:0;height:2px;background:var(--border);z-index:99}
+  .rprog{height:100%;background:linear-gradient(90deg,var(--a2),var(--accent));transform-origin:left;animation:shrink 2s linear infinite}
+  @keyframes shrink{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+  body::after{content:'';position:fixed;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.12),transparent);animation:scan 9s linear infinite;pointer-events:none;z-index:1}
+  @keyframes scan{from{top:-2px}to{top:100vh}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-box">🚑</div>
+    FEDROUTE <span style="color:var(--muted);font-size:.65rem;margin-left:4px">v3.0</span>
+  </div>
+  <div class="live">
+    <div class="dot"></div>
+    LIVE NETWORK &nbsp;|&nbsp; <span id="clock" style="color:var(--text)"></span>
+  </div>
+</header>
+
+
+
+<!-- RECOMMENDATION HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-label">FEDERATED LEARNING RECOMMENDATION</div>
+    <div class="hero-title">🚑 Incoming ambulance — which route should it take?</div>
+    <div class="rec-box waiting" id="rec-box">
+      <div class="rec-letter" id="rec-letter">?</div>
+      <div class="rec-info">
+        <div class="rec-tag">RECOMMENDED ROUTE</div>
+        <div class="rec-name" id="rec-name">Waiting for reporters…</div>
+        <div class="rec-delay" id="rec-delay">No data yet</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="avg-card" id="avg-A">
+      <div class="avg-route">ROUTE A · SHORT</div>
+      <div class="avg-val" id="avgv-A">—</div>
+      <div class="avg-sub">avg delay</div>
+    </div>
+    <div class="avg-card" id="avg-B">
+      <div class="avg-route">ROUTE B · MEDIUM</div>
+      <div class="avg-val" id="avgv-B">—</div>
+      <div class="avg-sub">avg delay</div>
+    </div>
+    <div class="avg-card" id="avg-C">
+      <div class="avg-route">ROUTE C · LONG</div>
+      <div class="avg-val" id="avgv-C">—</div>
+      <div class="avg-sub">avg delay</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTER CARDS -->
+<div class="section-title" id="reporter-label">▸ REPORTER AMBULANCES — <span id="rep-count">0</span> reporting road conditions</div>
+<main id="grid">
+  <div class="empty">
+    <div class="empty-ico">📡</div>
+    <div>No reporter ambulances yet</div>
+    <div style="margin-top:8px;font-size:.68rem">Run: python client.py reporter Ambulance-1</div>
+  </div>
+</main>
+
+<div class="rbar"><div class="rprog"></div></div>
+
+<script>
+  const ROUTE_NAMES = { A:"Short (City Centre)", B:"Medium (Ring Road)", C:"Long (Highway)" };
+  const ROUTE_DIST  = { A:5, B:10, C:15 };
+  const TRAFFIC_VAL = { Low:2, Medium:7, High:14 };
+
+  function tc(level){ return level==="Low"?"tl":level==="Medium"?"tm":"th" }
+
+  // Clock
+  setInterval(()=>{ document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false}) },1000);
+  document.getElementById("clock").textContent=new Date().toLocaleTimeString("en-US",{hour12:false});
+
+  function updateHero(global_avg, recommended) {
+    const routes = ["A","B","C"];
+
+    // Update avg cards
+    routes.forEach(r => {
+      const card  = document.getElementById(`avg-${r}`);
+      const valEl = document.getElementById(`avgv-${r}`);
+      const val   = global_avg[r];
+      valEl.textContent = val != null ? val : "—";
+      card.classList.toggle("best", r === recommended);
+    });
+
+    // Update recommendation box
+    const box     = document.getElementById("rec-box");
+    const letter  = document.getElementById("rec-letter");
+    const name    = document.getElementById("rec-name");
+    const delay   = document.getElementById("rec-delay");
+
+    if (recommended && global_avg[recommended] != null) {
+      box.className = "rec-box";
+      letter.textContent = recommended;
+      name.textContent   = ROUTE_NAMES[recommended];
+      delay.textContent  = `Avg delay: ${global_avg[recommended]} min — lowest among all routes`;
+    } else {
+      box.className = "rec-box waiting";
+      letter.textContent = "?";
+      name.textContent   = "Waiting for reporters…";
+      delay.textContent  = "No data yet";
+    }
+  }
+
+  function buildCard(name, data) {
+    const { delays, traffic } = data;
+    const bestLocal = Object.keys(delays).reduce((a,b)=>delays[a]<delays[b]?a:b);
+
+    const rows = ["A","B","C"].map(r => {
+      const isBest = r === bestLocal;
+      const tv = TRAFFIC_VAL[traffic[r]];
+      return `
+        <div class="rrow ${isBest?'best':''}" id="rrow-${name}-${r}">
+          <div class="rletter">${r}</div>
+          <div>
+            <div class="rname">${ROUTE_NAMES[r]}</div>
+            <div class="rdist">${ROUTE_DIST[r]} km base</div>
+          </div>
+          <div class="tpill ${tc(traffic[r])}" id="tp-${name}-${r}">${traffic[r]}</div>
+          <div>
+            <div class="rdelay" id="dv-${name}-${r}">${delays[r]}</div>
+            <div class="rbreak">${ROUTE_DIST[r]}+${tv}</div>
+          </div>
+        </div>`;
+    }).join("");
+
+    const avg = Object.values(delays).reduce((a,b)=>a+b,0)/3;
+    return `
+      <div class="rep-card" id="card-${name}">
+        <div class="rep-header">
+          <div class="rep-name">🚑 ${name}</div>
+          <div class="rep-badge">REPORTER</div>
+        </div>
+        <div class="rep-body" id="body-${name}">${rows}</div>
+        <div class="rep-footer">
+          <span>REPORTED AVG DELAY</span>
+          <span class="wchip" id="wt-${name}">${avg.toFixed(2)} min</span>
+        </div>
+      </div>`;
+  }
+
+  function updateCard(name, data) {
+    const { delays, traffic } = data;
+    const bestLocal = Object.keys(delays).reduce((a,b)=>delays[a]<delays[b]?a:b);
+    const body = document.getElementById(`body-${name}`);
+    if (!body) return;
+
+    ["A","B","C"].forEach(r => {
+      const row = body.querySelector(`#rrow-${name}-${r}`);
+      if (!row) return;
+      row.className = `rrow ${r===bestLocal?'best':''}`;
+      const tp = row.querySelector(`#tp-${name}-${r}`);
+      if (tp){ tp.className=`tpill ${tc(traffic[r])}`;tp.textContent=traffic[r]; }
+      const dv = row.querySelector(`#dv-${name}-${r}`);
+      if (dv) dv.textContent = delays[r];
+    });
+
+    const avg = Object.values(delays).reduce((a,b)=>a+b,0)/3;
+    const wt  = document.getElementById(`wt-${name}`);
+    if (wt) wt.textContent = avg.toFixed(2)+" min";
+  }
+
+  async function refresh() {
+    try {
+      const res  = await fetch("/state");
+      const data = await res.json();
+
+      updateHero(data.global_avg || {}, data.recommended);
+
+      document.getElementById("rep-count").textContent = data.count || 0;
+
+      const reporters = data.reporters || {};
+      const names     = Object.keys(reporters);
+      const grid      = document.getElementById("grid");
+
+      if (names.length === 0) {
+        grid.innerHTML = `<div class="empty"><div class="empty-ico">📡</div><div>No reporter ambulances yet</div><div style="margin-top:8px;font-size:.68rem">Run: python client.py reporter Ambulance-1</div></div>`;
+        return;
+      }
+
+      names.forEach(n => {
+        if (!document.getElementById(`card-${n}`)) {
+          const tmp = document.createElement("div");
+          tmp.innerHTML = buildCard(n, reporters[n]);
+          const node = tmp.firstElementChild;
+          node.style.opacity="0"; node.style.transform="translateY(16px)";
+          const empty = grid.querySelector(".empty");
+          if (empty) grid.innerHTML="";
+          grid.appendChild(node);
+          requestAnimationFrame(()=>{
+            node.style.transition="opacity .4s ease,transform .4s ease";
+            node.style.opacity="1"; node.style.transform="";
+          });
+        } else {
+          updateCard(n, reporters[n]);
+        }
+      });
+
+      // Remove stale
+      grid.querySelectorAll(".rep-card").forEach(card=>{
+        if (!names.includes(card.id.replace("card-",""))) card.remove();
+      });
+
+    } catch(e){ console.error(e); }
+  }
+
+  refresh();
+  setInterval(refresh, 2000);
+</script>
+</body>
+</html>
